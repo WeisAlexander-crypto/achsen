@@ -1,44 +1,24 @@
 {
   "regeln": [
-    {
-      "r_min": 0.0,
-      "r_max": 10.0,
-      "abstand": 0.5
-    },
-    {
-      "r_min": 10.0,
-      "r_max": 15.0,
-      "abstand": 1.0
-    },
-    {
-      "r_min": 15.0,
-      "r_max": 30.0,
-      "abstand": 3.0
-    },
-    {
-      "r_min": 30.0,
-      "r_max": 100.0,
-      "abstand": 5.0
-    },
-    {
-      "r_min": 100.0,
-      "r_max": 500.0,
-      "abstand": 10.0
-    }
+    { "r_min": 0,   "r_max": 10,  "abstand": 0.5 },
+    { "r_min": 10,  "r_max": 15,  "abstand": 1 },
+    { "r_min": 15,  "r_max": 30,  "abstand": 3 },
+    { "r_min": 30,  "r_max": 100, "abstand": 5 },
+    { "r_min": 100, "r_max": 500, "abstand": 10 }
   ],
-  "abstand_sonst": 20.0,
+  "abstand_sonst": 20,
   "abtastabstand": 0.5,
   "max_abtastpunkte": 4000,
   "glaettung": 5,
-  "min_abschnittslaenge": 2.0,
-  "verteilung": "gleichmaessig",
+  "min_abschnittslaenge": 2,
+  "verteilung": "Gleichmaessig",
   "endpunkt_erzwingen": true,
   "abschnitte_erzeugen": true,
-  "linienlaenge": 10.0,
+  "linienlaenge": 10,
   "x_orthogonalisieren": true,
+  "hilfsgeometrie_ausblenden": true,
   "x_umkehren": false,
   "z_umkehren": false,
-  "hilfsgeometrie_ausblenden": true,
   "ergebnis_set": "Achsen_Ergebnis",
   "praefix": "AX"
 }
