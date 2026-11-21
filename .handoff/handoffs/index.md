@@ -1,0 +1,1 @@
+2026-11-21T03:19:35.079Z | catia v5, vb.net, axis systems, curvature split, grenzraster, catiasession, achsen | Goal: CATIA V5 app reading curves (selection or geoset), analyzing curvature radius, splitting curves into sections per | 2026-11-21/handoff-2026-11-21T03-19-35-079Z.md
