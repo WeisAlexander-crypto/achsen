@@ -8,7 +8,7 @@ darauf regelbasiert Punkte setzt und auf jedem Punkt ein Achsensystem erzeugt.
 | Schritt | Was passiert | In CATIA erzeugt |
 |---|---|---|
 | 1. Einlesen | Kurven markieren **oder** ein Geometrisches Set wählen (Unter-Sets werden mit durchsucht) | – |
-| 2. Analyse | Kurve wird abgetastet (Standard alle 0,5 mm), Krümmungsradius aus je 3 Nachbarpunkten, Median-Glättung | – (temporär, wird gelöscht) |
+| 2. Analyse | Kurve wird abgetastet (Standard alle 0,5 mm): alle Messpunkte in ein temporäres Geoset, **ein** Update, Koordinaten lesen, Geoset mit **einem** Löschvorgang entfernen. Krümmungsradius aus je 3 Nachbarpunkten, Median-Glättung | – (temporär, wird gelöscht) |
 | 3. Zerlegen | Wechselt der Radius in einen anderen Regelbereich → Schnitt. Zu kurze Abschnitte werden mit dem Nachbarn verschmolzen | `Abschnitte` (Split) |
 | 4. Punkte | Je Abschnitt Punktabstand laut Regel (z. B. R 10–15 → alle 1 mm) | `Punkte` |
 | 5. Normale | Linie 90° zur gewählten Fläche durch jeden Punkt | `Normalen` |

@@ -39,28 +39,41 @@ Public Class CatiaSession
     Private Const CAT_MULTISEL_VALIDATE As Integer = 2   ' CATMultiSelTriggWhenUserValidatesSelection
     Private Shared ReadOnly MeasurableCurves As Integer() = {7, 8, 9}  ' CatMeasurableName: Curve, Circle, Line
 
-    ' Abtastung komplett innerhalb von CATIA (eine COM-Rundreise statt tausender)
+    ' Abtastung komplett innerhalb von CATIA (eine COM-Rundreise):
+    ' alle Messpunkte in das temporaere Geoset legen -> EIN Part.Update -> Koordinaten lesen.
+    ' Das Geoset wird danach mit EINEM Loeschvorgang entfernt (siehe Sample).
     Private Const VBS_SAMPLE As String =
 "Function SampleCurve(oPart, oHB, oRef, n)
-    Dim fac, pt, spa, ptRef, m, i
+    Dim fac, spa, m, i
     Dim c(2)
+    Dim pts()
     Dim res()
+    ReDim pts(n)
     ReDim res(3 * (n + 1) - 1)
     Set fac = oPart.HybridShapeFactory
-    Set pt = fac.AddNewPointOnCurveFromPercent(oRef, 0.0, False)
-    oHB.AppendHybridShape pt
-    Set spa = oPart.Parent.GetWorkbench(""SPAWorkbench"")
-    Set ptRef = oPart.CreateReferenceFromObject(pt)
     For i = 0 To n
-        pt.Ratio.Value = i / n
-        oPart.UpdateObject pt
-        Set m = spa.GetMeasurable(ptRef)
+        Set pts(i) = fac.AddNewPointOnCurveFromPercent(oRef, i / n, False)
+        oHB.AppendHybridShape pts(i)
+    Next
+    On Error Resume Next
+    oPart.Update
+    If Err.Number <> 0 Then
+        ' Part enthaelt fremde fehlerhafte Elemente -> nur die Messpunkte aktualisieren
+        Err.Clear
+        On Error GoTo 0
+        For i = 0 To n
+            oPart.UpdateObject pts(i)
+        Next
+    End If
+    On Error GoTo 0
+    Set spa = oPart.Parent.GetWorkbench(""SPAWorkbench"")
+    For i = 0 To n
+        Set m = spa.GetMeasurable(oPart.CreateReferenceFromObject(pts(i)))
         m.GetPoint c
         res(3 * i) = c(0)
         res(3 * i + 1) = c(1)
         res(3 * i + 2) = c(2)
     Next
-    fac.DeleteObjectForDatum ptRef
     SampleCurve = res
 End Function"
 
@@ -233,11 +246,14 @@ End Function"
         Dim tmp = _part.HybridBodies.Add()
         tmp.Name = "_tmp_abtastung"
         Dim raw As Object
+        Dim oldRefresh As Boolean = True
+        Try : oldRefresh = CBool(_catia.RefreshDisplay) : _catia.RefreshDisplay = False : Catch : End Try
         Try
             raw = _catia.SystemService.Evaluate(VBS_SAMPLE, CAT_VBSCRIPT, "SampleCurve",
                                                 New Object() {_part, tmp, curve.Ref, n})
         Finally
-            DeleteObj(tmp)
+            DeleteObj(tmp)      ' ein Loeschvorgang fuer alle Messpunkte
+            Try : _catia.RefreshDisplay = oldRefresh : Catch : End Try
         End Try
         Dim vals = DirectCast(raw, Array)
         Dim lb = vals.GetLowerBound(0)

@@ -13,7 +13,7 @@
 ### Key Decisions
 - Decision: VB.NET WinForms targeting net48 — Reason: user asked for VB.NET; net48 preinstalled on CATIA workstations
 - Decision: COM late binding (Option Strict Off in CatiaSession.vb only) — Reason: no CATIA interop DLLs needed, works across V5 releases
-- Decision: curve sampling inside CATIA via SystemService.Evaluate VBScript moving one point — Reason: one COM roundtrip, avoids GetPoint array marshalling issues and thousands of temp features
+- Decision: curve sampling inside CATIA via SystemService.Evaluate VBScript: all sample points into temp geoset, ONE Part.Update, read coords, ONE delete of geoset (user request) — Reason: one COM roundtrip, avoids per-point updates and GetPoint array marshalling issues
 - Decision: split side chosen by probe midpoint min-distance — Reason: length-based choice ambiguous when both pieces equal length
 - Decision: rules half-open [min,max); gaps -> nearest rule (finer on tie); above all -> abstand_sonst — Reason: user's example ranges 10-15/16-30 have gaps
 - Decision: median smoothing + min section length merge — Reason: prevent class flicker at transitions
