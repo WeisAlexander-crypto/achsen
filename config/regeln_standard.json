@@ -11,6 +11,7 @@
   "max_abtastpunkte": 4000,
   "glaettung": 5,
   "min_abschnittslaenge": 2,
+  "grenzraster": 0,
   "verteilung": "Gleichmaessig",
   "endpunkt_erzwingen": true,
   "abschnitte_erzeugen": true,

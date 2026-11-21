@@ -307,6 +307,24 @@ End Function"
         Return Ref(result)
     End Function
 
+    ''' <summary>Kontrolle: Summe der erzeugten Teilstuecke = Kurvenlaenge.</summary>
+    Private Sub CheckSegmentLengths(curve As GeoInput, an As CurveAnalysis, segRefs As Dictionary(Of Integer, Object))
+        If an.Segments.Count < 2 OrElse segRefs.Values.Any(Function(r) r Is curve.Ref) Then Return
+        Dim sum = 0.0
+        For Each seg In an.Segments
+            Dim l = CurveLength(segRefs(seg.Index))
+            If Math.Abs(l - seg.Laenge) > 0.01 Then
+                _log($"  WARNUNG Abschnitt {seg.Index + 1}: Laenge {l:0.000} mm, erwartet {seg.Laenge:0.000} mm")
+            End If
+            sum += l
+        Next
+        If Math.Abs(sum - an.Laenge) > 0.01 * an.Segments.Count Then
+            _log($"  WARNUNG Laengenpruefung: Summe Teilstuecke {sum:0.000} mm <> Kurve {an.Laenge:0.000} mm")
+        Else
+            _log($"  Laengenpruefung OK: {an.Segments.Count} Teilstuecke = {sum:0.000} mm")
+        End If
+    End Sub
+
     ''' <summary>Erzeugt Abschnitte, Punkte, Normalen und Achsensysteme. Liefert Anzahl Achsensysteme.</summary>
     Public Function Build(curves As IList(Of GeoInput), analyses As IList(Of CurveAnalysis), surface As GeoInput,
                           cfg As Settings, Optional progress As Action(Of Integer, Integer) = Nothing) As Integer
@@ -317,7 +335,9 @@ End Function"
         Dim total = analyses.Sum(Function(a) a.PointCount)
         Dim done = 0, created = 0, errors = 0
         Dim lx = cfg.Linienlaenge
-        Try : _catia.RefreshDisplay = False : Catch : End Try
+        Dim oldRefresh As Boolean = True
+        Try : oldRefresh = CBool(_catia.RefreshDisplay) : _catia.RefreshDisplay = False : Catch : End Try
+        Dim rules = cfg.SortedRules()
         Try
             For ci = 1 To curves.Count
                 Dim curve = curves(ci - 1), an = analyses(ci - 1)
@@ -329,7 +349,7 @@ End Function"
 
                 Dim segRefs As New Dictionary(Of Integer, Object)
                 For Each seg In an.Segments
-                    Dim tag = $"Abschnitt_{seg.Index + 1:00}"
+                    Dim tag = $"Abschnitt_{seg.Index + 1:00}_{seg.ShortLabel(rules)}"
                     If cfg.AbschnitteErzeugen AndAlso an.Segments.Count > 1 Then
                         Try
                             segRefs(seg.Index) = MakeSegment(curve, an, seg, hbSeg, hbHelp, tag)
@@ -341,6 +361,7 @@ End Function"
                         segRefs(seg.Index) = curve.Ref
                     End If
                 Next
+                CheckSegmentLengths(curve, an, segRefs)
 
                 Dim pi = 0
                 For Each kv In an.AllPoints()
@@ -399,7 +420,7 @@ End Function"
             Next
             _part.Update()
         Finally
-            Try : _catia.RefreshDisplay = True : Catch : End Try
+            Try : _catia.RefreshDisplay = oldRefresh : Catch : End Try
         End Try
         _log($"Fertig: {created} Achsensystem(e) erzeugt, {errors} Fehler.")
         Return created

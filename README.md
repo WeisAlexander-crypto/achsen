@@ -20,7 +20,7 @@ Struktur im Baum:
 ```
 Achsen_Ergebnis
  └─ 01_<Kurvenname>
-     ├─ Abschnitte        Abschnitt_01, Abschnitt_02, …
+     ├─ Abschnitte        Abschnitt_01_Gerade, Abschnitt_02_R10-15, …
      ├─ Punkte            P_AX_01_0001, …
      ├─ Normalen          N_AX_01_0001, …
      └─ Hilfsgeometrie    Tangenten, Tangentialebenen, Projektionen (ausgeblendet)
@@ -78,6 +78,7 @@ Optionen (rechts im Eigenschaftenfenster, mit Erklärung):
 | Abtastabstand | Messpunktabstand für die Radiusanalyse (kleiner = genauer, langsamer) |
 | Glättung | Median-Fenster gegen Ausreißer an Übergängen (1 = aus) |
 | Min. Abschnittslänge | Abschnitte darunter werden mit dem längeren Nachbarn verschmolzen |
+| Grenzraster | Abschnittsgrenzen auf Vielfache dieses Werts ab Kurvenanfang runden. `1` = Schnitte nur auf ganzen mm, `0` = aus (Standard) |
 | Verteilung | `Gleichmaessig`: Abstand ≤ Regelwert, Punkte auf Start **und** Ende des Abschnitts · `Exakt`: genau Regelwert ab Abschnittsstart |
 | Kurventeilstücke erzeugen | Kurventeilstücke per Split erzeugen; X referenziert dann das Teilstück |
 | X exakt senkrecht zu Z | Tangente auf die Tangentialebene der Fläche projizieren → X exakt ⟂ Z, auch wenn die Kurve nicht exakt auf der Fläche liegt |
@@ -87,6 +88,7 @@ Optionen (rechts im Eigenschaftenfenster, mit Erklärung):
 ## Hinweise
 
 * Die Kurve sollte auf oder nahe der Fläche liegen; die Normale wird im Lotfußpunkt berechnet.
+* Nach dem Zerlegen wird geprüft, ob die Summe der Teilstücke die Kurvenlänge ergibt (Meldung im Protokoll).
 * Bei geschlossenen Kurven kann der Split scheitern – dann referenziert X automatisch die Originalkurve (Meldung im Protokoll).
 * Alle Elemente sind parametrisch verknüpft: Ändert sich die Fläche, aktualisieren sich Normalen und Achsensysteme.
   Ändert sich die Kurve selbst, sollte neu analysiert werden, da sich die Abschnittsgrenzen verschieben.

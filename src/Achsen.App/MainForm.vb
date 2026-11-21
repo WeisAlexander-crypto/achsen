@@ -306,7 +306,7 @@ Public Class MainForm
             Return
         End If
         Dim n = _analyses.Sum(Function(a) a.PointCount)
-        If MessageBox.Show($"{n} Achsensysteme erzeugen?", "Erzeugen", MessageBoxButtons.YesNo, MessageBoxIcon.Question) <> DialogResult.Yes Then Return
+        If MessageBox.Show($"{n} Achsensysteme erzeugen?{Environment.NewLine}{Environment.NewLine}Tipp: CATPart vorher speichern (Sicherheitskopie).", "Erzeugen", MessageBoxButtons.YesNo, MessageBoxIcon.Question) <> DialogResult.Yes Then Return
         Dim dummy As Integer
         Catia(Function() _session.Build(_curves, _analyses, _surface, _cfg,
                                         Sub(done, total)

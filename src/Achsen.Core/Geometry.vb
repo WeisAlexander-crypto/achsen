@@ -39,6 +39,12 @@ Public Class Segment
         End Get
     End Property
 
+    ''' <summary>Kurzname fuer CATIA-Elementnamen, z. B. "R10-15" oder "Gerade".</summary>
+    Public Function ShortLabel(rules As IList(Of Rule)) As String
+        If RuleIndex = Geometry.STRAIGHT Then Return "Gerade"
+        Return $"R{Rule.Fmt(rules(RuleIndex).RMin)}-{Rule.Fmt(rules(RuleIndex).RMax)}"
+    End Function
+
     Public Function RuleLabel(rules As IList(Of Rule)) As String
         Return If(RuleIndex = Geometry.STRAIGHT, "Gerade/sonst", rules(RuleIndex).Label())
     End Function
@@ -224,6 +230,30 @@ Public Module Geometry
         Return runs
     End Function
 
+    ''' <summary>Rundet innere Grenzen auf Vielfache von raster (z. B. ganze mm).
+    ''' Dabei leer gewordene Abschnitte entfallen, gleiche Nachbarn werden zusammengefasst.</summary>
+    Private Function SnapBoundaries(runs As List(Of Run), raster As Double, length As Double) As List(Of Run)
+        For k = 0 To runs.Count - 2
+            Dim b = Math.Round(runs(k).S1 / raster, MidpointRounding.AwayFromZero) * raster
+            b = Math.Min(Math.Max(b, 0.0), length)
+            runs(k).S1 = b
+            runs(k + 1).S0 = b
+        Next
+        Dim out As New List(Of Run)
+        For Each r In runs
+            If r.S1 - r.S0 <= EPS Then Continue For
+            If out.Count > 0 AndAlso out(out.Count - 1).Cls = r.Cls Then
+                out(out.Count - 1).S1 = r.S1
+                out(out.Count - 1).I1 = r.I1
+            Else
+                If out.Count > 0 Then r.S0 = out(out.Count - 1).S1   ' lueckenlos halten
+                out.Add(r)
+            End If
+        Next
+        If out.Count > 0 Then out(0).S0 = 0.0 : out(out.Count - 1).S1 = length
+        Return out
+    End Function
+
     ''' <summary>Komplette Analyse: Radius -> Klassen -> Abschnitte -> Punkte.</summary>
     Public Function Analyze(name As String, points As IList(Of Vec3), length As Double, cfg As Settings) As CurveAnalysis
         Dim rules = cfg.SortedRules()
@@ -236,6 +266,7 @@ Public Module Geometry
         Dim classes = rad.Select(Function(r) Classify(r, rules)).ToArray()
 
         Dim runs = MergeShort(BuildRuns(classes, s, length), cfg.MinAbschnittslaenge)
+        If cfg.Grenzraster > 0 Then runs = SnapBoundaries(runs, cfg.Grenzraster, length)
 
         Dim segments As New List(Of Segment)
         Dim trim = cfg.Glaettung \ 2 + 1

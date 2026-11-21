@@ -107,4 +107,39 @@ Public Class GeometryTests
         Dim res = Geometry.Analyze("K1", c.Item1, c.Item2, cfg)
         Assert.DoesNotContain(0, res.Segments.Select(Function(sg) sg.RuleIndex))
     End Sub
+
+    <Fact> Public Sub GrenzrasterGanzeMm()
+        Dim c = CompositeCurve()
+        Dim cfg As New Settings With {.Regeln = New List(Of Rule) From {New Rule(10, 15, 1), New Rule(15, 30, 3)},
+                                      .AbstandSonst = 10, .Grenzraster = 1}
+        Dim res = Geometry.Analyze("K1", c.Item1, c.Item2, cfg)
+        Assert.Equal(4, res.Segments.Count)
+        For i = 1 To res.Segments.Count - 1
+            Dim b = res.Segments(i).SStart
+            Assert.Equal(Math.Round(b), b, 9)                              ' Grenze auf ganzem mm
+            Assert.Equal(res.Segments(i - 1).SEnd, b, 9)                   ' lueckenlos
+        Next
+        Assert.Equal(0.0, res.Segments(0).SStart)
+        Assert.Equal(c.Item2, res.Segments.Last().SEnd, 9)
+        Assert.Equal(39.0, res.Segments(2).SStart, 9)                      ' 20 + 6*pi = 38.85 -> 39
+    End Sub
+
+    <Fact> Public Sub GrobesRasterEntferntLeereAbschnitte()
+        Dim c = CompositeCurve()
+        Dim cfg As New Settings With {.Regeln = New List(Of Rule) From {New Rule(10, 15, 1), New Rule(15, 30, 3)},
+                                      .AbstandSonst = 10, .Grenzraster = 50}
+        Dim res = Geometry.Analyze("K1", c.Item1, c.Item2, cfg)
+        Assert.All(res.Segments, Sub(sg) Assert.True(sg.Laenge > 0))
+        For i = 1 To res.Segments.Count - 1
+            Assert.Equal(res.Segments(i - 1).SEnd, res.Segments(i).SStart, 9)
+            Assert.NotEqual(res.Segments(i - 1).RuleIndex, res.Segments(i).RuleIndex)
+        Next
+        Assert.Equal(c.Item2, res.Segments.Last().SEnd, 9)
+    End Sub
+
+    <Fact> Public Sub ShortLabelFuerElementnamen()
+        Dim rules As New List(Of Rule) From {New Rule(10, 15, 1)}
+        Assert.Equal("R10-15", New Segment With {.RuleIndex = 0}.ShortLabel(rules))
+        Assert.Equal("Gerade", New Segment With {.RuleIndex = Geometry.STRAIGHT}.ShortLabel(rules))
+    End Sub
 End Class

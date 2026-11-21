@@ -69,6 +69,11 @@ Public Class Settings
     <JsonPropertyName("min_abschnittslaenge")>
     Public Property MinAbschnittslaenge As Double = 2.0
 
+    <Category("2 Analyse"), DisplayName("Grenzraster [mm] (0 = aus)"),
+     Description("Abschnittsgrenzen auf Vielfache dieses Werts ab Kurvenanfang runden. 1 = Grenzen nur auf ganzen mm.")>
+    <JsonPropertyName("grenzraster")>
+    Public Property Grenzraster As Double = 0.0
+
     <Category("3 Punkte"), DisplayName("Verteilung"),
      Description("Gleichmaessig: Abstand <= Regelwert, Start- und Endpunkt je Abschnitt. Exakt: genau Regelwert ab Start.")>
     <JsonPropertyName("verteilung")>
@@ -151,6 +156,7 @@ Public Class Settings
         If MaxAbtastpunkte < 20 Then errs.Add("Max. Abtastpunkte muss >= 20 sein.")
         If Glaettung < 1 Then errs.Add("Glaettung muss >= 1 sein.")
         If MinAbschnittslaenge < 0 Then errs.Add("Min. Abschnittslaenge muss >= 0 sein.")
+        If Grenzraster < 0 Then errs.Add("Grenzraster muss >= 0 sein (0 = aus).")
         If Linienlaenge <= 0 Then errs.Add("Linienlaenge muss > 0 sein.")
         If String.IsNullOrWhiteSpace(Praefix) Then errs.Add("Praefix darf nicht leer sein.")
         If String.IsNullOrWhiteSpace(ErgebnisSet) Then errs.Add("Ergebnis-Geoset darf nicht leer sein.")
